@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Desktop Pet</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      background: transparent;
+      image-rendering: pixelated; /* keep pixel art crisp when scaled */
+    }
+
+    /* --- Pixel-style pet interaction menu --- */
+    .pixel-panel {
+      position: absolute;
+      display: none;
+      flex-direction: column;
+      background: #1a1a2e;
+      border: 3px solid #f4f4f4;
+      box-shadow:
+        0 0 0 3px #000,
+        4px 4px 0 0 rgba(0,0,0,0.5);
+      padding: 4px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      z-index: 10;
+      image-rendering: pixelated;
+    }
+
+    #pet-menu button {
+      display: block;
+      width: 130px;
+      background: #2e2e4e;
+      color: #f4f4f4;
+      border: 2px solid #6060a0;
+      margin: 2px 0;
+      padding: 6px 8px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 12px;
+      text-align: left;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+    #pet-menu button:hover {
+      background: #4a4a8a;
+      border-color: #a0a0ff;
+      color: #ffe66d;
+    }
+
+    #chat-panel {
+      padding: 8px;
+    }
+    #chat-panel input {
+      width: 160px;
+      background: #0f0f1e;
+      color: #ffe66d;
+      border: 2px solid #6060a0;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 12px;
+      padding: 5px;
+      outline: none;
+    }
+    #chat-panel .hint {
+      color: #888;
+      font-size: 10px;
+      margin-top: 4px;
+      letter-spacing: 0;
+    }
+
+    #friend-status-badge {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      display: none;
+      background: #1a1a2e;
+      border: 2px solid #7CFC00;
+      color: #7CFC00;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 11px;
+      padding: 4px 8px;
+      z-index: 5;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="pet-canvas"></canvas>
+
+  <div id="pet-menu" class="pixel-panel">
+    <button data-action="chat">&gt; CHAT</button>
+    <button data-action="animate">&gt; ANIMATE</button>
+    <button data-action="control">&gt; CONTROL</button>
+    <button data-action="send-friend" id="send-friend-btn" style="display:none;">&gt; SEND TO FRIEND</button>
+    <button data-action="send-home" id="send-home-btn" style="display:none;">&gt; SEND HOME</button>
+  </div>
+
+  <div id="chat-panel" class="pixel-panel">
+    <input id="chat-input" type="text" maxlength="40" placeholder="Say something..." />
+    <div class="hint">ENTER to send &middot; ESC to cancel</div>
+  </div>
+
+  <div id="friend-status-badge"></div>
+
+  <script src="node_modules/howler/dist/howler.min.js"></script>
+  <script src="node_modules/peerjs/dist/peerjs.min.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

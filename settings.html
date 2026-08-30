@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Desktop Pets — Settings</title>
+  <style>
+    body {
+      font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #1e1e2e;
+      color: #eee;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 16px;
+      color: #fff;
+    }
+    .control {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: #ccc;
+    }
+    .value {
+      float: right;
+      color: #8ab4f8;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    button {
+      background: #8ab4f8;
+      color: #1e1e2e;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background: #a8c7fa;
+    }
+  </style>
+</head>
+<body>
+  <h2>Pet Settings</h2>
+
+  <div class="control">
+    <label>Size <span class="value" id="size-value">100%</span></label>
+    <input type="range" id="size-slider" min="20" max="200" value="100" />
+  </div>
+
+  <div class="control">
+    <label>Speed <span class="value" id="speed-value">100%</span></label>
+    <input type="range" id="speed-slider" min="20" max="300" value="100" />
+  </div>
+
+  <div class="control">
+    <label>Volume <span class="value" id="volume-value">50%</span></label>
+    <input type="range" id="volume-slider" min="0" max="100" value="50" />
+  </div>
+
+  <div class="control" style="display:flex; align-items:center; gap:8px;">
+    <input type="checkbox" id="mute-checkbox" style="width:auto;" />
+    <label style="margin:0;" for="mute-checkbox">Mute all sounds</label>
+  </div>
+
+  <button id="close-btn">Done</button>
+
+  <script src="settings-renderer.js"></script>
+</body>
+</html>
