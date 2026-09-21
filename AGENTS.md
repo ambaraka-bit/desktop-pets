@@ -227,8 +227,9 @@ Do NOT commit `settings.json`, `.bak`, or tokens.
 2. **Repo hygiene** (§6) — resolved 2026-09-22: history rewritten (no `node_modules`/`release`
    blobs), all source committed, retired species cut, pushed to GitHub on `main`. Remaining
    nicety: branch protection / tags if a release workflow starts depending on them.
-3. **Version skew** — `package.json` says 0.2.0, shipped installer is 0.1.0. Bump intentionally
-   for the next real release (`npm run dist`).
+3. **Version skew — resolved 2026-09-22.** `package.json`/`package-lock.json` bumped to 0.3.0
+   (was 0.2.0, with the last actually-shipped installer still at 0.1.0). The next `npm run dist`
+   / `npm run publish` will produce the first installer that matches the declared version.
 4. **`GiingerCatAngry.png` filename typo** — load-bearing (species.js scans by name). If renamed,
    behavior mapping still works (`contains('angry')` → special) but grep for every reference.
 5. **PeerJS depends on a free public broker** (`0.peerjs.com`, in the CSP `connect-src`) — no

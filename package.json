@@ -1,6 +1,6 @@
 {
   "name": "desktop-pets",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A playful animated desktop companion app.",
   "author": "Ambara Bit <azzam.ambarak4869@gmail.com>",
   "main": "main.js",
