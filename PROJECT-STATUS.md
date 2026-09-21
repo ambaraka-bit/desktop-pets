@@ -21,8 +21,9 @@ and a free public WebRTC signaling broker (PeerJS) is the only external service.
 - **Working:** multi-monitor transparent pets + autonomous AI, tray controls, settings & global
   hotkeys, roster/position persistence, single-instance lock, and P2P Friends (multi-connection,
   pet migration, chat + chat-echo) — see §6 and §11.
-- **Species:** `FireWizard`, `LightningMage`, `WandererMagican` (full kits) plus `GingerCat` (now a
-  full kit too: Idle/Walk/Run/Jump/Angry/Punch/Kick, so it no longer relies on the §11.9 fallback).
+- **Species:** `GingerCat` only (full kit: Idle/Walk/Run/Jump/Angry/Punch/Kick/Laugh/Sad/Sleep).
+  `FireWizard`, `LightningMage`, `WandererMagican`, and `Swordman` were permanently retired and
+  removed from history on 2026-09-22 — see §11.15.
   Adding a species is just dropping a folder in — see §11.10.
 - **Verification:** `npm test` 25/25 green, `npm run lint` + `npm run format:check` clean,
   `npm run smoke` exits 0.
@@ -58,9 +59,10 @@ icon (add/remove pets, pause/mute, Settings, Friends, Quit).
 | `npm run publish`      | Build + upload installer to a GitHub Release (needs `GH_TOKEN`)   |
 | `npm run gen-icon`     | Regenerate `build/icon.ico` + `assets/tray-icon.png`              |
 
-> The repo has `node_modules/` and `release/` gitignored — never commit them. The git history is
-> currently messy (many source files are untracked, and `node_modules`/`release` were committed at
-> some point); tidy that up before the first real push.
+> The repo has `node_modules/` and `release/` gitignored — never commit them. History was rewritten
+> on 2026-09-22 (§11.15) so those directories and the retired species exist nowhere in git; the
+> full source tree is committed and pushed to GitHub on `main`. `git checkout` cannot resurrect the
+> retired species — they are permanently gone.
 
 ---
 
@@ -186,10 +188,11 @@ The **Friends window and the overlay live in different processes**, so main rela
 - The main process scans the folders (`species.js`); the frame count/width is sniffed **at load
   time** from the actual pixel geometry (`resolveSheet()` in renderer-draw.js), so non-square
   frames work too.
-- Current species: `FireWizard`, `GingerCat`, `LightningMage`, `WandererMagican`. Add a new one by
-  dropping a folder in — no code changes. Animation file names are matched case-insensitively
+- Current species: `GingerCat` only (`FireWizard`, `LightningMage`, `WandererMagican`, and
+  legacy `Swordman` were retired on 2026-09-22 — §11.15). Add a new one by dropping a folder in —
+  no code changes. Animation file names are matched case-insensitively
   (`idle.png` works the same as `Idle.png`), and frame layout is sniffed from the pixels at load
-  time, so both square-frame strips (e.g. `FireWizard/Idle.png` = seven 128×128 cells) and
+  time, so both square-frame strips (e.g. seven 128×128 cells) and
   non-square packed sheets (e.g. `GiingerCatAngry.png` = six 366×330 cells — yes, that sheet ships
   with a double-i typo in its filename — `GingerCatRun.png` = eight 381×238 cells,
   `GingerCatPunch.png` = twelve 280×170 cells, `GingerCatKick.png` = nine 348×302 cells) resolve
@@ -420,6 +423,22 @@ window when the cursor is in a monitor seam/gap or no display info is available,
 `Math.max` guards so an oversized menu never produces negative clamped coordinates. `.pixel-panel`
 in index.html also caps `max-width`/`max-height` to the viewport and scrolls (`overflow: auto`),
 so a large menu/SWAP-TO row can no longer be cropped at the screen edge.
+
+### 11.15 Repo history rewrite + species cut (2026-09-22)
+
+Cross-cutting cleanup ahead of the first real push to GitHub (`ambaraka-bit/desktop-pets`):
+
+- `git filter-repo` rewrote **all** history to remove `node_modules/`, `release/`, and the retired
+  species from every commit, shrinking `.git` from ~246MB to ~13.5MB. No `filter-branch`, no
+  reflog/backup resurrection afterwards (`gc --prune=now`).
+- All modern source files, configs, docs, tests, and the `GingerCat` kit were committed; the
+  previously half-finished `node_modules`/`release` untracking is now fully resolved and pushed.
+- `FireWizard`, `LightningMage`, `WandererMagican`, and legacy single-frame `Swordman` are
+  **permanently removed** (disk, index, and history) — confirmed unused, not pending restoration.
+  Species set is now exactly: `GingerCat`.
+- `DEFAULT_SETTINGS.activePets` in `settings.js` now defaults to `GingerCat` (was `FireWizard`) so
+  a fresh install spawns the one surviving pet; the matching test assertion was updated.
+- History force-pushed to `origin/main`. `.gitignore` still protects `node_modules/` and `release/`.
 
 ---
 

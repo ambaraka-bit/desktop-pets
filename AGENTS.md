@@ -199,29 +199,23 @@ messages are schema-validated by `sanitizeP2PMessage` before touching state/canv
 
 ## 6. Current repo state (IMPORTANT — read before you trust `git`)
 
-The git history/repo is in the messy state described in `PROJECT-STATUS.md` §1. Concretely,
+Repo was cleaned up on 2026-09-22: history was rewritten with `git filter-repo` to strip
+`node_modules/`, `release/`, and the four retired species out of **every commit**, then
+force-pushed to GitHub as fresh `main` history (`ambaraka-bit/desktop-pets`). Concretely,
 right now:
 
-- **On-disk species: only `GingerCat`.** `assets/Characters/FireWizard`, `LightningMage`,
-  `WandererMagican`, and `Swordman` PNGs show as _deleted in the working tree_ (git still has
-  them — `git checkout -- assets/Characters` restores them). They are NOT a local loss; they
-  were removed from disk only. `<Swordman/frame_0..7.png>` is the legacy single-frame species
-  that docs say is retired — ignore/remove it when assets are restored.
-- **Most modern source files are still untracked**: all renderer modules, `settings.js`,
-  `preload.js`, `utils.js`, `species.js`, `scripts/`, `tests/`, `chat-bubble.js`, `PROJECT-STATUS.md`,
-  `.github/`, the lint/format configs, `assets/Chat`, `assets/Layout`, `assets/Characters/GingerCat`.
-- **Modified (unstaged)**: `package.json` (version bumped to **0.2.0**; released installer is
-  still **0.1.0**), `package-lock.json`, `renderer.js`, `settings-renderer.js`, `settings.html`,
-  `species.js`.
-- **Staged deletions**: `node_modules/**` and `release/**` were removed from the index (they're
-  gitignored now) — the intent was `git rm --cached`, left half-finished. `node_modules/` and
-  `release/` still exist on disk.
-- Git log has only two "Initial" commits — no meaningful history to learn from.
+- **Final species set: `GingerCat` only.** `FireWizard`, `LightningMage`, `WandererMagican`,
+  and `Swordman` were confirmed unused and are **permanently cut** — from disk, the index,
+  and all of history. Do not restore them.
+- **History is lean (~13.5MB).** Two legacy "Initial" commits + cleanup commits; no
+  `node_modules`/`release`/species blobs anywhere. All source files, configs, docs, tests,
+  and the `GingerCat` kit are committed and pushed on `main` — working tree is clean.
+- **`node_modules/` and `release/` are gitignored** and must never re-enter the index
+  (`npm install` + `npm run dist` regenerate them).
+- `settings.js` fallback species is `GingerCat` (was `FireWizard`); the setting actually
+  drives a fresh install's first pet.
 
-**Action for whoever cleans this up:** decide the intended final species set with the human,
-restore or delete the removed character folders, then stage the real source files and make the
-index coherent (`remove node_modules/release from tracking is already staged; commit source +
-assets + config in logical chunks). Do NOT commit `settings.json`, `.bak`, tokens.
+Do NOT commit `settings.json`, `.bak`, or tokens.
 
 ---
 
@@ -230,8 +224,9 @@ assets + config in logical chunks). Do NOT commit `settings.json`, `.bak`, token
 1. **No code signing** — installer/update triggers SmartScreen "Unknown Publisher". To sign you'd
    supply `CSC_LINK`/`CSC_KEY_PASSWORD` (or `win.certificateFile`/`certificatePassword`) and keep
    `signAndEditExecutable: false` (electron-builder's `winCodeSign` breaks on Windows symlinks).
-2. **Repo hygiene** (§6) — no real git history, most files untracked, species assets deleted on
-   disk. Tidy before any release workflow depends on tags/branches.
+2. **Repo hygiene** (§6) — resolved 2026-09-22: history rewritten (no `node_modules`/`release`
+   blobs), all source committed, retired species cut, pushed to GitHub on `main`. Remaining
+   nicety: branch protection / tags if a release workflow starts depending on them.
 3. **Version skew** — `package.json` says 0.2.0, shipped installer is 0.1.0. Bump intentionally
    for the next real release (`npm run dist`).
 4. **`GiingerCatAngry.png` filename typo** — load-bearing (species.js scans by name). If renamed,
@@ -241,7 +236,6 @@ assets + config in logical chunks). Do NOT commit `settings.json`, `.bak`, token
 
 ### Reasonable next steps (pick one, verify with the human)
 
-- Restore the species asset folders and finish the git cleanup (biggest "must" before anything else).
 - Add a new species (drop art in `assets/Characters/<Name>/`, add a test for its `animationBehavior`).
 - Improve migration UX (queued migrations, per-friend lists, guest cap).
 - Cross-compile/portability study (Electron packaging is Windows-only by design — don't silently
