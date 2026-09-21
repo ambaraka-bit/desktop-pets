@@ -1,0 +1,10 @@
+# Dependencies — regenerated via `npm install`
+node_modules/
+
+# Build output — regenerated via `npm run dist` / `npm run publish`
+release/
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db
+*.log
