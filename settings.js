@@ -51,7 +51,7 @@ const DEFAULT_SETTINGS = Object.freeze({
   // Pet roster entries are PROFILES: { speciesId, name?, x? } (kept flexible so
   // custom names + screen positions survive relaunch). Old string-only entries
   // are still accepted by sanitizeSettings and upgraded on load.
-  activePets: [{ speciesId: 'FireWizard', name: null }],
+  activePets: [{ speciesId: 'GingerCat', name: null }],
   isPaused: false,
   sizePercent: 100,
   speedPercent: 100,

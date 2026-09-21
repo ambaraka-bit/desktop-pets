@@ -38,7 +38,15 @@ module.exports = [
   },
   {
     // Renderer bundle: shared global namespace across files.
-    files: ['state.js', 'pet-ai.js', 'chat-bubble.js', 'renderer-draw.js', 'p2p.js', 'interaction.js', 'renderer.js'],
+    files: [
+      'state.js',
+      'pet-ai.js',
+      'chat-bubble.js',
+      'renderer-draw.js',
+      'p2p.js',
+      'interaction.js',
+      'renderer.js'
+    ],
     languageOptions: {
       globals: {
         ...globals.browser,

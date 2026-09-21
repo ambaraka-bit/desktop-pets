@@ -58,7 +58,7 @@ class ChatBubble {
   constructor(options = {}) {
     this.imagePath = options.imagePath;
     if (!this.imagePath) {
-      throw new Error("ChatBubble: options.imagePath is required");
+      throw new Error('ChatBubble: options.imagePath is required');
     }
 
     this.parent = options.parent || document.body;
@@ -80,10 +80,10 @@ class ChatBubble {
 
   /** Injects the one shared <style> block (only once per page/app). */
   _injectStyles() {
-    if (document.getElementById("chat-bubble-styles")) return;
+    if (document.getElementById('chat-bubble-styles')) return;
 
-    const style = document.createElement("style");
-    style.id = "chat-bubble-styles";
+    const style = document.createElement('style');
+    style.id = 'chat-bubble-styles';
     style.textContent = `
       .pet-chat-bubble {
         position: absolute;
@@ -121,8 +121,8 @@ class ChatBubble {
 
   /** Creates the bubble DOM element and applies its 9-slice sizing. */
   _buildElement() {
-    const el = document.createElement("div");
-    el.className = "pet-chat-bubble";
+    const el = document.createElement('div');
+    el.className = 'pet-chat-bubble';
 
     const { top, right, bottom, left } = this.slice;
     const s = this.scale;
@@ -150,7 +150,7 @@ class ChatBubble {
    */
   say(text) {
     this.el.textContent = text;
-    this.el.classList.add("visible");
+    this.el.classList.add('visible');
 
     clearTimeout(this._hideTimer);
     if (this.hideDelay > 0) {
@@ -160,7 +160,7 @@ class ChatBubble {
 
   /** Hides the bubble (keeps it in the DOM for reuse). */
   hide() {
-    this.el.classList.remove("visible");
+    this.el.classList.remove('visible');
     clearTimeout(this._hideTimer);
   }
 
@@ -193,6 +193,6 @@ class ChatBubble {
 }
 
 // Support both ES module and plain <script> usage.
-if (typeof module !== "undefined" && module.exports) {
+if (typeof module !== 'undefined' && module.exports) {
   module.exports = ChatBubble;
 }

@@ -331,7 +331,7 @@ test('sanitizeSettings cleans activePets and falls back when empty', () => {
   assert.deepEqual(sanitizeSettings({ activePets: [] }).activePets, [
     DEFAULT_SETTINGS.activePets[0]
   ]);
-  assert.equal(sanitizeSettings({ activePets: 'not-array' }).activePets[0].speciesId, 'FireWizard');
+  assert.equal(sanitizeSettings({ activePets: 'not-array' }).activePets[0].speciesId, 'GingerCat');
 });
 
 test('sanitizeSettings keeps name/x inside profiles, capping hostile values', () => {
