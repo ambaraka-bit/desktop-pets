@@ -1,99 +1,147 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <meta charset="UTF-8" />
-  <title>Desktop Pets — Friends</title>
-  <style>
-    body {
-      font-family: 'Courier New', monospace;
-      font-weight: bold;
-      margin: 0;
-      padding: 16px;
-      background: #1a1a2e;
-      color: #f4f4f4;
-    }
-    h2 { margin: 0 0 12px; font-size: 15px; color: #ffe66d; }
-    h3 { margin: 16px 0 6px; font-size: 12px; color: #a0a0ff; }
-    .box {
-      border: 2px solid #6060a0;
-      background: #0f0f1e;
-      padding: 8px;
-      margin-bottom: 10px;
-      font-size: 12px;
-    }
-    .code {
-      font-size: 18px;
-      letter-spacing: 2px;
-      color: #ffe66d;
-    }
-    #status-line { font-size: 12px; margin-bottom: 10px; }
-    .status-connected { color: #7CFC00; }
-    .status-idle { color: #888; }
-    .status-connecting { color: #ffe66d; }
-    .status-error { color: #ff6b6b; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+    />
+    <title>Desktop Pets — Friends</title>
+    <style>
+      body {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        margin: 0;
+        padding: 16px;
+        background: #1a1a2e;
+        color: #f4f4f4;
+      }
+      h2 {
+        margin: 0 0 12px;
+        font-size: 15px;
+        color: #ffe66d;
+      }
+      h3 {
+        margin: 16px 0 6px;
+        font-size: 12px;
+        color: #a0a0ff;
+      }
+      .box {
+        border: 2px solid #6060a0;
+        background: #0f0f1e;
+        padding: 8px;
+        margin-bottom: 10px;
+        font-size: 12px;
+      }
+      .code {
+        font-size: 18px;
+        letter-spacing: 2px;
+        color: #ffe66d;
+      }
+      #status-line {
+        font-size: 12px;
+        margin-bottom: 10px;
+      }
+      .status-connected {
+        color: #7cfc00;
+      }
+      .status-idle {
+        color: #888;
+      }
+      .status-connecting {
+        color: #ffe66d;
+      }
+      .status-error {
+        color: #ff6b6b;
+      }
 
-    input[type="text"] {
-      width: 140px;
-      background: #0f0f1e;
-      color: #ffe66d;
-      border: 2px solid #6060a0;
-      font-family: 'Courier New', monospace;
-      font-weight: bold;
-      font-size: 12px;
-      padding: 5px;
-      outline: none;
-    }
-    button {
-      background: #2e2e4e;
-      color: #f4f4f4;
-      border: 2px solid #6060a0;
-      padding: 6px 10px;
-      font-family: 'Courier New', monospace;
-      font-weight: bold;
-      font-size: 12px;
-      cursor: pointer;
-      margin-left: 4px;
-    }
-    button:hover { background: #4a4a8a; border-color: #a0a0ff; color: #ffe66d; }
-    button:disabled { opacity: 0.4; cursor: default; }
+      input[type='text'] {
+        width: 140px;
+        background: #0f0f1e;
+        color: #ffe66d;
+        border: 2px solid #6060a0;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 12px;
+        padding: 5px;
+        outline: none;
+      }
+      button {
+        background: #2e2e4e;
+        color: #f4f4f4;
+        border: 2px solid #6060a0;
+        padding: 6px 10px;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 12px;
+        cursor: pointer;
+        margin-left: 4px;
+      }
+      button:hover {
+        background: #4a4a8a;
+        border-color: #a0a0ff;
+        color: #ffe66d;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
 
-    ul { list-style: none; padding: 0; margin: 0; font-size: 11px; }
-    li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 0;
-      border-bottom: 1px solid #2e2e4e;
-    }
-    li button { margin-left: 8px; padding: 3px 6px; font-size: 10px; }
-    .empty { color: #666; font-size: 11px; }
-  </style>
-</head>
-<body>
-  <h2>&gt; FRIENDS</h2>
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 11px;
+      }
+      li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 4px 0;
+        border-bottom: 1px solid #2e2e4e;
+      }
+      li button {
+        margin-left: 8px;
+        padding: 3px 6px;
+        font-size: 10px;
+      }
+      .empty {
+        color: #666;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>&gt; FRIENDS</h2>
 
-  <div class="box">
-    Your code: <span class="code" id="my-code">------</span>
-  </div>
+    <div class="box">
+      Your code:
+      <span class="code" id="my-code">------</span>
+      <button id="copy-btn" title="Copy your friend code">Copy</button>
+    </div>
 
-  <div id="status-line" class="status-idle">Not connected.</div>
+    <div id="status-line" class="status-idle">Not connected.</div>
 
-  <div class="box">
-    <input id="friend-code-input" type="text" maxlength="8" placeholder="Friend's code" />
-    <button id="connect-btn">Connect</button>
-    <button id="disconnect-btn" disabled>Disconnect</button>
-  </div>
+    <div class="box">
+      <input id="friend-code-input" type="text" maxlength="8" placeholder="Friend's code" />
+      <button id="connect-btn">Connect</button>
+      <button id="disconnect-btn" disabled>Disconnect</button>
+    </div>
 
-  <h3>Pets visiting a friend</h3>
-  <div class="box">
-    <ul id="away-list"><li class="empty">None right now.</li></ul>
-  </div>
+    <h3>Pets visiting a friend</h3>
+    <div class="box">
+      <ul id="away-list">
+        <li class="empty">None right now.</li>
+      </ul>
+    </div>
 
-  <h3>Guests on your desktop</h3>
-  <div class="box">
-    <ul id="guest-list"><li class="empty">None right now.</li></ul>
-  </div>
+    <h3>Guests on your desktop</h3>
+    <div class="box">
+      <ul id="guest-list">
+        <li class="empty">None right now.</li>
+      </ul>
+    </div>
 
-  <script src="friends-renderer.js"></script>
-</body>
+    <script src="friends-renderer.js"></script>
+  </body>
 </html>

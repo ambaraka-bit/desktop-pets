@@ -1,118 +1,224 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <meta charset="UTF-8" />
-  <title>Desktop Pet</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background: transparent;
-      overflow: hidden;
-    }
-    canvas {
-      display: block;
-      background: transparent;
-      image-rendering: pixelated; /* keep pixel art crisp when scaled */
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; connect-src 'self' https://0.peerjs.com wss://0.peerjs.com"
+    />
+    <title>Desktop Pet</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+        background: transparent;
+        image-rendering: pixelated; /* keep pixel art crisp when scaled */
+      }
 
-    /* --- Pixel-style pet interaction menu --- */
-    .pixel-panel {
-      position: absolute;
-      display: none;
-      flex-direction: column;
-      background: #1a1a2e;
-      border: 3px solid #f4f4f4;
-      box-shadow:
-        0 0 0 3px #000,
-        4px 4px 0 0 rgba(0,0,0,0.5);
-      padding: 4px;
-      font-family: 'Courier New', monospace;
-      font-weight: bold;
-      z-index: 10;
-      image-rendering: pixelated;
-    }
+      /* --- Pixel-style pet interaction menu --- */
+      .pixel-panel {
+        position: absolute;
+        display: none;
+        flex-direction: column;
+        background: #1a1a2e;
+        border: calc(3px * var(--s)) solid #f4f4f4;
+        box-shadow:
+          0 0 0 calc(3px * var(--s)) #000,
+          calc(4px * var(--s)) calc(4px * var(--s)) 0 0 rgba(0, 0, 0, 0.5);
+        padding: calc(4px * var(--s));
+        max-width: calc(100vw - calc(8px * var(--s)));
+        max-height: calc(100vh - calc(8px * var(--s)));
+        overflow: auto;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        z-index: 10;
+        image-rendering: pixelated;
+      }
 
-    #pet-menu button {
-      display: block;
-      width: 130px;
-      background: #2e2e4e;
-      color: #f4f4f4;
-      border: 2px solid #6060a0;
-      margin: 2px 0;
-      padding: 6px 8px;
-      font-family: 'Courier New', monospace;
-      font-weight: bold;
-      font-size: 12px;
-      text-align: left;
-      cursor: pointer;
-      letter-spacing: 1px;
-    }
-    #pet-menu button:hover {
-      background: #4a4a8a;
-      border-color: #a0a0ff;
-      color: #ffe66d;
-    }
+      #pet-menu {
+        background-image: url('assets/Layout/OptionsMenu.png');
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-color: transparent;
+        border: none;
+        box-shadow: none;
+        padding: calc(12px * var(--s));
+      }
 
-    #chat-panel {
-      padding: 8px;
-    }
-    #chat-panel input {
-      width: 160px;
-      background: #0f0f1e;
-      color: #ffe66d;
-      border: 2px solid #6060a0;
-      font-family: 'Courier New', monospace;
-      font-weight: bold;
-      font-size: 12px;
-      padding: 5px;
-      outline: none;
-    }
-    #chat-panel .hint {
-      color: #888;
-      font-size: 10px;
-      margin-top: 4px;
-      letter-spacing: 0;
-    }
+      #pet-menu button[data-action] {
+        display: block;
+        width: calc(200px * var(--s));
+        background: transparent;
+        color: transparent;
+        border: none;
+        margin: calc(4px * var(--s)) 0;
+        padding: calc(10px * var(--s)) calc(14px * var(--s));
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: calc(16px * var(--s));
+        text-align: left;
+        cursor: pointer;
+        letter-spacing: calc(1px * var(--s));
+        user-select: none;
+        -webkit-user-select: none;
+      }
 
-    #friend-status-badge {
-      position: fixed;
-      top: 8px;
-      left: 8px;
-      display: none;
-      background: #1a1a2e;
-      border: 2px solid #7CFC00;
-      color: #7CFC00;
-      font-family: 'Courier New', monospace;
-      font-weight: bold;
-      font-size: 11px;
-      padding: 4px 8px;
-      z-index: 5;
-    }
-  </style>
-</head>
-<body>
-  <canvas id="pet-canvas"></canvas>
+      #chat-panel {
+        padding: calc(8px * var(--s));
+      }
+      #chat-panel input {
+        width: calc(160px * var(--s));
+        background: #0f0f1e;
+        color: #ffe66d;
+        border: calc(2px * var(--s)) solid #6060a0;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: calc(12px * var(--s));
+        padding: calc(5px * var(--s));
+        outline: none;
+      }
+      #chat-panel .hint {
+        color: #888;
+        font-size: calc(10px * var(--s));
+        margin-top: calc(4px * var(--s));
+        letter-spacing: 0;
+      }
 
-  <div id="pet-menu" class="pixel-panel">
-    <button data-action="chat">&gt; CHAT</button>
-    <button data-action="animate">&gt; ANIMATE</button>
-    <button data-action="control">&gt; CONTROL</button>
-    <button data-action="send-friend" id="send-friend-btn" style="display:none;">&gt; SEND TO FRIEND</button>
-    <button data-action="send-home" id="send-home-btn" style="display:none;">&gt; SEND HOME</button>
-  </div>
+      #friend-status-badge {
+        position: fixed;
+        top: calc(8px * var(--s));
+        left: calc(8px * var(--s));
+        display: none;
+        background: #1a1a2e;
+        border: calc(2px * var(--s)) solid #7cfc00;
+        color: #7cfc00;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: calc(11px * var(--s));
+        padding: calc(4px * var(--s)) calc(8px * var(--s));
+        z-index: 5;
+      }
 
-  <div id="chat-panel" class="pixel-panel">
-    <input id="chat-input" type="text" maxlength="40" placeholder="Say something..." />
-    <div class="hint">ENTER to send &middot; ESC to cancel</div>
-  </div>
+      #echo-banner {
+        position: fixed;
+        bottom: calc(12px * var(--s));
+        left: calc(50%);
+        transform: translateX(-50%);
+        display: none;
+        background: #1a1a2e;
+        border: calc(2px * var(--s)) solid #7cfc00;
+        color: #ffe66d;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: calc(12px * var(--s));
+        padding: calc(6px * var(--s)) calc(12px * var(--s));
+        z-index: 6;
+        white-space: nowrap;
+      }
 
-  <div id="friend-status-badge"></div>
+      /* Species-swap row inside the pet menu */
+      #pet-menu #swap-title {
+        color: #a087ff;
+        margin: calc(6px * var(--s)) 0 calc(2px * var(--s));
+        font-size: calc(10px * var(--s));
+        letter-spacing: calc(1px * var(--s));
+      }
+      #pet-menu #swap-btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: calc(2px * var(--s));
+        max-width: calc(200px * var(--s));
+      }
+      #pet-menu #swap-btns button {
+        width: auto;
+        margin: 0;
+        padding: calc(4px * var(--s)) calc(6px * var(--s));
+        font-size: calc(10px * var(--s));
+        text-align: center;
+        letter-spacing: 0;
+      }
 
-  <script src="node_modules/howler/dist/howler.min.js"></script>
-  <script src="node_modules/peerjs/dist/peerjs.min.js"></script>
-  <script src="renderer.js"></script>
-</body>
+      /* Chat-log panel */
+      #history-panel {
+        min-width: calc(200px * var(--s));
+        max-width: calc(260px * var(--s));
+        max-height: calc(160px * var(--s));
+      }
+      #history-title {
+        color: #ffe66d;
+        font-size: calc(11px * var(--s));
+        letter-spacing: calc(1px * var(--s));
+        padding: 0 0 calc(4px * var(--s)) 0;
+      }
+      #history-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        overflow-y: auto;
+        color: #c8c8e8;
+        font-size: calc(10px * var(--s));
+        font-weight: normal;
+      }
+      #history-list li {
+        padding: calc(2px * var(--s)) 0;
+        border-bottom: calc(1px * var(--s)) solid #33335a;
+      }
+      #history-list li.history-empty {
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="pet-canvas"></canvas>
+
+    <div id="pet-menu" class="pixel-panel">
+      <button data-action="chat">&gt; CHAT</button>
+      <button data-action="rename">&gt; RENAME</button>
+      <button data-action="control">&gt; CONTROL</button>
+      <button data-action="history" id="pet-menu-history">&gt; HISTORY</button>
+      <button data-action="send-friend" id="send-friend-btn" style="display: none">
+        &gt; SEND TO FRIEND
+      </button>
+      <button data-action="send-home" id="send-home-btn" style="display: none">
+        &gt; SEND HOME
+      </button>
+      <div id="pet-menu-swap" style="display: none">
+        <div id="swap-title">SWAP TO</div>
+        <div id="swap-btns"></div>
+      </div>
+    </div>
+
+    <div id="chat-panel" class="pixel-panel">
+      <input id="chat-input" type="text" maxlength="40" placeholder="Say something..." />
+      <div class="hint">ENTER to send &middot; ESC to cancel</div>
+    </div>
+
+    <div id="history-panel" class="pixel-panel">
+      <div id="history-title">Chat log</div>
+      <ul id="history-list"></ul>
+    </div>
+
+    <div id="friend-status-badge"></div>
+    <div id="echo-banner"></div>
+
+    <script src="node_modules/howler/dist/howler.min.js"></script>
+    <script src="node_modules/peerjs/dist/peerjs.min.js"></script>
+    <script src="utils.js"></script>
+    <script src="state.js"></script>
+    <script src="pet-ai.js"></script>
+    <script src="chat-bubble.js"></script>
+    <script src="renderer-draw.js"></script>
+    <script src="p2p.js"></script>
+    <script src="interaction.js"></script>
+    <script src="renderer.js"></script>
+  </body>
 </html>

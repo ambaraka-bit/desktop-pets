@@ -1,18 +1,29 @@
 {
   "name": "desktop-pets",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A playful animated desktop companion app.",
-  "author": "Your Name",
+  "author": "Ambara Bit <azzam.ambarak4869@gmail.com>",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "test": "node --test",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "smoke": "set DP_SMOKE_TEST=1&& set DP_DEBUG=1&& electron .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder --win nsis",
-    "publish": "electron-builder --win nsis --publish always"
+    "publish": "electron-builder --win nsis --publish always",
+    "gen-icon": "node scripts/generate-icon.js"
   },
   "devDependencies": {
-    "electron": "^31.0.0",
-    "electron-builder": "^24.13.3"
+    "electron": "^44.2.0",
+    "electron-builder": "^26.15.3",
+    "eslint": "^9.9.1",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.9.0",
+    "prettier": "^3.3.3"
   },
   "dependencies": {
     "howler": "^2.2.4",
@@ -23,14 +34,31 @@
     "extract-zip": "^2.0.1"
   },
   "build": {
-    "appId": "com.yourname.desktoppets",
+    "appId": "com.ambaraka-bit.desktoppets",
     "productName": "Desktop Pets",
     "directories": {
       "output": "release"
     },
     "files": [
-      "**/*",
-      "!release/**"
+      "main.js",
+      "preload.js",
+      "settings.js",
+      "species.js",
+      "utils.js",
+      "state.js",
+      "pet-ai.js",
+      "chat-bubble.js",
+      "renderer-draw.js",
+      "p2p.js",
+      "interaction.js",
+      "renderer.js",
+      "settings-renderer.js",
+      "friends-renderer.js",
+      "index.html",
+      "settings.html",
+      "friends.html",
+      "assets/**",
+      "!assets/**/*.psd"
     ],
     "win": {
       "target": "nsis",
@@ -45,8 +73,13 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "YOUR_GITHUB_USERNAME",
+      "owner": "ambaraka-bit",
       "repo": "desktop-pets"
     }
+  },
+  "allowScripts": {
+    "electron-winstaller@5.4.0": true,
+    "electron@44.3.0": true,
+    "electron-builder@26.15.3": true
   }
 }

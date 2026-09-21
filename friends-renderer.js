@@ -1,6 +1,11 @@
-const { ipcRenderer } = require('electron');
+// friends-renderer.js — Friends window (contextIsolation build).
+//
+// Runs in the isolated main world: no require(), no ipcRenderer. Everything
+// goes through window.api (whitelisted bridge in preload.js). Copy-to-clipboard
+// is routed to main because navigator.clipboard isn't available on file://.
 
 const myCodeEl = document.getElementById('my-code');
+const copyBtn = document.getElementById('copy-btn');
 const statusLine = document.getElementById('status-line');
 const friendInput = document.getElementById('friend-code-input');
 const connectBtn = document.getElementById('connect-btn');
@@ -11,11 +16,21 @@ const guestList = document.getElementById('guest-list');
 connectBtn.addEventListener('click', () => {
   const code = friendInput.value.trim().toUpperCase();
   if (!code) return;
-  ipcRenderer.send('friends:connect-request', code);
+  api.send('friends:connect-request', code);
 });
 
 disconnectBtn.addEventListener('click', () => {
-  ipcRenderer.send('friends:disconnect-request');
+  api.send('friends:disconnect-request');
+});
+
+copyBtn.addEventListener('click', () => {
+  const code = myCodeEl.textContent.trim();
+  if (!code || code === '------') return;
+  api.send('copy-to-clipboard', code);
+  copyBtn.textContent = 'Copied!';
+  setTimeout(() => {
+    copyBtn.textContent = 'Copy';
+  }, 1200);
 });
 
 function renderList(el, items, emptyText, onAction, actionLabel) {
@@ -40,8 +55,11 @@ function renderList(el, items, emptyText, onAction, actionLabel) {
   }
 }
 
-ipcRenderer.on('friends:status-update', (event, status) => {
-  myCodeEl.textContent = status.myCode || '------';
+let currentCode = '';
+api.on('friends:status-update', status => {
+  if (!status || typeof status !== 'object') return;
+  currentCode = status.myCode || '';
+  myCodeEl.textContent = currentCode || '------';
 
   statusLine.className = '';
   if (status.state === 'connected') {
@@ -68,20 +86,26 @@ ipcRenderer.on('friends:status-update', (event, status) => {
 
   renderList(
     awayList,
-    (status.awayPets || []).map(p => ({ id: p.migrationId, label: `${p.speciesId} (visiting ${status.friendCode || 'friend'})` })),
+    (status.awayPets || []).map(p => ({
+      id: p.migrationId,
+      label: `${p.speciesId} (visiting ${p.friendCode || status.friendCode || 'friend'})`
+    })),
     'None right now.',
-    (migrationId) => ipcRenderer.send('friends:recall-request', migrationId),
+    migrationId => api.send('friends:recall-request', migrationId),
     'Recall'
   );
 
   renderList(
     guestList,
-    (status.guestPets || []).map(p => ({ id: p.migrationId, label: `${p.speciesId} (from ${p.guestOwner})` })),
+    (status.guestPets || []).map(p => ({
+      id: p.migrationId,
+      label: `${p.speciesId} (from ${p.guestOwner})`
+    })),
     'None right now.',
-    (migrationId) => ipcRenderer.send('friends:send-home-request', migrationId),
+    migrationId => api.send('friends:send-home-request', migrationId),
     'Send Home'
   );
 });
 
 // Ask for the current state as soon as this window opens.
-ipcRenderer.send('friends:request-status');
+api.send('friends:request-status');
