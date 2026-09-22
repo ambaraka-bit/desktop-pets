@@ -73,6 +73,22 @@ async function resolveSheet(speciesId, animName) {
       : detectFrameWidthFromBlankness(blankness, img.width, frameHeight);
   const frameCount = img.width / frameWidth;
 
+  // Horizontal extent of the character art, local to a single frame's own
+  // coordinate space and unioned across every frame in the strip (a punch's
+  // outstretched arm can reach further right than an idle pose, so the union
+  // — not any one frame — is the animation's true content width). Paired with
+  // charTop/charHeight below, this lets draw() crop to the ACTUAL character
+  // bounding box instead of the full sheet cell, so two animations authored
+  // at different pixel dimensions (e.g. a 95px-wide idle frame vs. a 380px-wide
+  // charge frame) still render at the same on-screen size instead of one
+  // looking stretched/squashed relative to the other.
+  const { contentLeft, contentRight, hasContent: hasHContent } = analyzeFrameContentBounds(
+    probeCtx,
+    img.width,
+    frameHeight,
+    frameWidth
+  );
+
   const sheet = {
     img,
     frameWidth,
@@ -85,10 +101,34 @@ async function resolveSheet(speciesId, animName) {
     // fixed height.
     charTop: hasContent ? contentTop : 0,
     charHeight: hasContent ? contentBottom - contentTop + 1 : frameHeight,
-    charBottom: hasContent ? contentBottom : frameHeight - 1
+    charBottom: hasContent ? contentBottom : frameHeight - 1,
+    // Same idea, horizontally, local to one frame's own width.
+    charLeft: hasHContent ? contentLeft : 0,
+    charWidth: hasHContent ? contentRight - contentLeft + 1 : frameWidth
   };
   resolvedSheets.set(key, sheet);
   return sheet;
+}
+
+// Union, across every frame in the strip, of which LOCAL x-offsets (0..frameWidth-1)
+// contain opaque pixels in any frame. Scans the same pixel buffer analyzeColumns
+// already read; a fresh getImageData() call is cheap relative to image decode and
+// only runs once per sheet (cached forever in resolvedSheets).
+function analyzeFrameContentBounds(cctx, width, height, frameWidth) {
+  const pixels = cctx.getImageData(0, 0, width, height).data;
+  let left = frameWidth;
+  let right = -1;
+  for (let x = 0; x < width; x++) {
+    const localX = x % frameWidth;
+    for (let y = 0; y < height; y++) {
+      if (pixels[(y * width + x) * 4 + 3] >= 16) {
+        if (localX < left) left = localX;
+        if (localX > right) right = localX;
+        break; // presence is enough — no need to keep scanning this column
+      }
+    }
+  }
+  return { hasContent: right >= 0, contentLeft: right >= 0 ? left : 0, contentRight: right };
 }
 
 // Fraction of each column that is (nearly) transparent — a divider column
@@ -213,15 +253,31 @@ function draw() {
 
     const rawFrame = pet.currentFrame % sheet.frameCount;
     const frameIndex = FRAME_REORDER[`${pet.speciesId}/${animName}`]?.[rawFrame] ?? rawFrame;
-    const sx = frameIndex * sheet.frameWidth;
-    // Crop each frame to the character's vertical extent (union over all
-    // frames) and stretch that band into the fixed on-screen box, so every
-    // animation's body renders at the same size regardless of how much of the
-    // source cell the art fills (e.g. GingerCat sleep = 203px of a 334px cell).
+    // Crop each frame to the character's real bounding box — vertical extent
+    // (charTop/charHeight) AND horizontal extent (charLeft/charWidth), both
+    // unioned across every frame of this animation — instead of the raw sheet
+    // cell, so blank margins baked into the source PNG don't count toward size.
+    const sx = frameIndex * sheet.frameWidth + sheet.charLeft;
     const sy = sheet.charTop;
+    const sW = sheet.charWidth;
     const sH = sheet.charHeight;
 
-    const { x: rX, y: rY, w: displayW, h: displayH } = petDisplayRect(pet);
+    const { x: rX, y: rY, w: displaySize, h: displayH } = petDisplayRect(pet);
+
+    // One uniform scale factor, derived from height, applied to BOTH
+    // dimensions — not an independent width stretch — so the character's true
+    // aspect ratio is preserved. Two animations authored at very different
+    // pixel dimensions (e.g. a 95px-wide idle frame vs. a 380px-wide charge
+    // frame) end up the same apparent SIZE instead of one looking
+    // stretched/squashed relative to the other. drawH always equals displayH
+    // exactly, so feet still land on the floor precisely as before; only
+    // drawW now varies pose-to-pose, so it's centered in the square footprint
+    // rather than left-anchored, keeping the pet visually stable frame to
+    // frame instead of appearing to shift sideways.
+    const scale = sH > 0 ? displayH / sH : 1;
+    const drawW = sW * scale;
+    const drawH = sH * scale;
+    const offsetX = (displaySize - drawW) / 2;
 
     ctx.save();
     if (highContrast) {
@@ -230,7 +286,7 @@ function draw() {
         'drop-shadow(2px 2px 0 #000000) drop-shadow(-2px -2px 0 #000000) drop-shadow(2px -2px 0 #000000) drop-shadow(-2px 2px 0 #000000)';
     }
     if (pet.direction === -1) {
-      ctx.translate(rX + displayW, rY);
+      ctx.translate(rX + displaySize, rY);
       ctx.scale(-1, 1);
     } else {
       ctx.translate(rX, rY);
@@ -239,19 +295,19 @@ function draw() {
       sheet.img,
       sx,
       sy,
-      sheet.frameWidth,
-      sH, // source crop from the sheet
+      sW,
+      sH, // source crop from the sheet — the character's real bounding box
+      offsetX,
       0,
-      0,
-      displayW,
-      displayH // destination on canvas
+      drawW,
+      drawH // destination on canvas — uniformly scaled, centered horizontally
     );
     ctx.restore();
 
     // Chat speech bubble — a DOM element (chat-bubble.js) layered above the
     // canvas and anchored over the pet's head so its tail points at the sprite.
     if (pet.chatText && performance.now() < pet.chatExpiresAt) {
-      updateChatBubble(pet, { x: rX, y: rY, w: displayW, h: displayH });
+      updateChatBubble(pet, { x: rX, y: rY, w: displaySize, h: displayH });
     } else if (pet.chatText) {
       pet.chatText = null; // expired
       hideChatBubble(pet);
@@ -268,7 +324,7 @@ function draw() {
       ctx.font = `bold ${9 * screenScale}px "Courier New", monospace`;
       ctx.fillStyle = UI_COLORS.nameLabel;
       ctx.textAlign = 'center';
-      ctx.fillText(pet.name, rX + displayW / 2, labelY);
+      ctx.fillText(pet.name, rX + displaySize / 2, labelY);
       ctx.restore();
       labelY -= 12 * screenScale;
     }
@@ -277,7 +333,7 @@ function draw() {
       ctx.font = `bold ${10 * screenScale}px "Courier New", monospace`;
       ctx.fillStyle = UI_COLORS.controlling;
       ctx.textAlign = 'center';
-      ctx.fillText('▲ CONTROLLING (ESC to release)', rX + displayW / 2, labelY);
+      ctx.fillText('▲ CONTROLLING (ESC to release)', rX + displaySize / 2, labelY);
       ctx.restore();
     }
     // Guest nameplate — makes it obvious this pet is visiting from a friend.
@@ -286,7 +342,7 @@ function draw() {
       ctx.font = `bold ${9 * screenScale}px "Courier New", monospace`;
       ctx.fillStyle = UI_COLORS.guestNameplate;
       ctx.textAlign = 'center';
-      ctx.fillText(`♦ ${pet.guestOwner}'s guest`, rX + displayW / 2, rY - 6 * screenScale);
+      ctx.fillText(`♦ ${pet.guestOwner}'s guest`, rX + displaySize / 2, rY - 6 * screenScale);
       ctx.restore();
     }
   }
