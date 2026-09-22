@@ -68,6 +68,11 @@ test('animationBehavior handles species-name prefixed sheets (GingerCat)', () =>
   assert.equal(animationBehavior('GingerCatWalk.png'), 'walk');
   assert.equal(animationBehavior('GingerCatRun.png'), 'run');
   assert.equal(animationBehavior('GingerCatJump.png'), 'jump');
+  // Regression: 'charge' used to be the one behavior matched with
+  // startsWith() instead of includes(), so a species-prefixed sheet like
+  // this would silently fall through to 'special' instead of being
+  // recognized as a charge animation.
+  assert.equal(animationBehavior('GingerCatCharge.png'), 'charge');
   assert.equal(animationBehavior('GingerCatAngry.png'), 'special');
   assert.equal(animationBehavior('GingerCatPunch.png'), 'special');
   assert.equal(animationBehavior('GingerCatKick.png'), 'special');

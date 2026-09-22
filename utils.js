@@ -21,7 +21,7 @@ function animationBehavior(name) {
   if (n.includes('idle')) return 'idle';
   if (n.includes('walk')) return 'walk';
   if (n.includes('run')) return 'run';
-  if (n.startsWith('charge')) return 'charge';
+  if (n.includes('charge')) return 'charge';
   if (n.includes('jump')) return 'jump';
   if (n.includes('attack')) return 'attack';
   if (n.includes('hurt')) return 'flinch';
